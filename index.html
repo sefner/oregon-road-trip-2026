@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oregon Road Trip Planner 2026</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#11130f;
+  --panel:#191d16;
+  --panel-2:#222719;
+  --line:#333b28;
+  --text:#edf2e8;
+  --muted:#a8b59d;
+  --dim:#748168;
+  --gold:#e6b84c;
+  --green:#77b255;
+  --blue:#6fb4d8;
+  --red:#e17b63;
+  --sand:#d7c28d;
+  --ink:#0d100b;
+}
+body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;letter-spacing:0}
+a{color:var(--blue);text-decoration:none}
+a:hover{text-decoration:underline}
+button,input,select{font:inherit}
+.shell{min-height:100vh}
+.hero{min-height:64vh;display:grid;grid-template-columns:minmax(340px,460px) 1fr;border-bottom:1px solid var(--line);background:#151811}
+.hero-copy{padding:28px 32px 24px;display:flex;flex-direction:column;justify-content:space-between;gap:24px}
+.kicker{font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+h1{font-size:clamp(2.1rem,5vw,4.6rem);line-height:.95;margin-top:10px;max-width:10ch;color:#fff}
+.dek{font-size:1.02rem;line-height:1.65;color:var(--muted);margin-top:18px;max-width:38rem}
+.hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.icon-btn,.mode-btn,.small-btn{border:1px solid var(--line);background:var(--panel-2);color:var(--text);border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:.15s ease}
+.icon-btn{height:40px;padding:0 14px;font-weight:800}
+.icon-btn.primary{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+.icon-btn:hover,.mode-btn:hover,.small-btn:hover{filter:brightness(1.1)}
+.icon-btn svg,.nav-btn svg,.source-toggle svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+.hero-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.meta-tile{border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.035);padding:12px}
+.meta-val{font-size:1.18rem;font-weight:900;color:var(--gold)}
+.meta-label{font-size:.7rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-top:3px}
+.map-wrap{position:relative;min-height:64vh;border-left:1px solid var(--line);overflow:hidden;background:#162017}
+#map{position:absolute;inset:0;background:linear-gradient(160deg,#10170f 0%,#1f2c1d 52%,#121813 100%)}
+.svg-map{width:100%;height:100%;display:block}
+.map-land{fill:#24301f;stroke:#3c4b32;stroke-width:1.4}
+.map-water{fill:#10202b}
+.map-shade{fill:#1a2418;opacity:.7}
+.map-road{fill:none;stroke:#4c5944;stroke-width:2;stroke-dasharray:6 8;opacity:.9}
+.map-route{fill:none;stroke:var(--gold);stroke-width:4.5;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 3px 6px rgba(0,0,0,.45))}
+.map-stop-ring{fill:#10130e;stroke:#0b0d09;stroke-width:2}
+.map-stop{stroke:#0b0d09;stroke-width:2.5}
+.map-stop-num{font-size:10px;font-weight:900;fill:#0d100b;text-anchor:middle;dominant-baseline:central}
+.map-label{font-size:12px;font-weight:850;fill:#edf2e8;paint-order:stroke;stroke:#11130f;stroke-width:4;stroke-linejoin:round}
+.map-small-label{font-size:10px;font-weight:750;fill:#a8b59d;paint-order:stroke;stroke:#11130f;stroke-width:3;stroke-linejoin:round}
+.map-region{font-size:28px;font-weight:950;fill:rgba(237,242,232,.08);letter-spacing:.08em}
+.map-popup{position:absolute;z-index:520;min-width:220px;max-width:280px;background:#11130f;border:1px solid var(--line);border-radius:8px;padding:10px 12px;box-shadow:0 12px 30px rgba(0,0,0,.35);display:none;pointer-events:none}
+.map-popup.show{display:block}
+.map-popup strong{display:block;font-size:.9rem;color:#fff;margin-bottom:2px}
+.map-popup span{font-size:.72rem;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:var(--gold)}
+.map-popup p{font-size:.78rem;color:var(--muted);line-height:1.45;margin-top:5px}
+.map-toolbar{position:absolute;top:16px;left:16px;right:16px;z-index:500;display:flex;gap:8px;justify-content:space-between;align-items:flex-start;pointer-events:none}
+.route-switch{display:flex;gap:6px;flex-wrap:wrap;pointer-events:auto;background:rgba(17,19,15,.86);padding:6px;border:1px solid var(--line);border-radius:10px;backdrop-filter:blur(10px)}
+.mode-btn{height:34px;padding:0 10px;font-size:.78rem;color:var(--muted);background:transparent}
+.mode-btn.active{background:var(--gold);border-color:var(--gold);color:var(--ink)}
+.map-note{pointer-events:auto;max-width:280px;background:rgba(17,19,15,.9);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--muted);font-size:.76rem;line-height:1.45}
+.tabs{position:sticky;top:0;z-index:50;background:rgba(17,19,15,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);display:flex;gap:4px;overflow-x:auto;padding:0 32px}
+.nav-btn{height:52px;border:0;background:transparent;color:var(--dim);display:flex;align-items:center;gap:7px;padding:0 12px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;font-weight:750;font-size:.86rem}
+.nav-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
+.content{max-width:1480px;margin:0 auto;padding:28px 32px 56px}
+.panel{display:none}
+.panel.active{display:block}
+.section-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-end;margin-bottom:16px}
+.section-head h2{font-size:1.28rem;line-height:1.2}
+.section-head p{color:var(--muted);font-size:.9rem;line-height:1.5;max-width:680px}
+.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.card.pad{padding:16px}
+.stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:22px}
+.stat-card{padding:14px 16px;background:var(--panel);border:1px solid var(--line);border-radius:8px}
+.stat-card .num{font-size:1.45rem;font-weight:950;color:var(--gold)}
+.stat-card .lab{font-size:.7rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-top:3px}
+.trip-controls{display:grid;grid-template-columns:1.3fr .9fr .9fr;gap:14px;margin-bottom:22px}
+.control{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.control label{font-size:.72rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;font-weight:800;display:block;margin-bottom:8px}
+.range-row{display:flex;align-items:center;gap:14px}
+input[type=range]{width:100%;accent-color:var(--gold)}
+select{width:100%;background:#10130e;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:10px}
+.range-val{font-size:1.35rem;font-weight:950;color:var(--gold);min-width:72px;text-align:right}
+.route-summary{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.summary-list{list-style:none}
+.summary-list li{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.055);color:var(--muted);line-height:1.45;font-size:.88rem}
+.summary-list li:last-child{border-bottom:0}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--gold);margin-top:7px;flex:0 0 auto}
+.itinerary{display:grid;gap:12px}
+.day-card{display:grid;grid-template-columns:88px 1fr 300px;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.day-num{background:#10130e;border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px}
+.day-num strong{font-size:1.65rem;color:var(--gold);line-height:1}
+.day-num span{font-size:.68rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-top:5px}
+.day-main{padding:16px 18px}
+.day-title{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.day-title h3{font-size:1.02rem;color:#fff}
+.pill{display:inline-flex;align-items:center;border-radius:999px;border:1px solid rgba(255,255,255,.12);padding:3px 8px;font-size:.68rem;font-weight:850;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,.035);white-space:nowrap}
+.pill.camp{color:#9fd47d;border-color:rgba(119,178,85,.35);background:rgba(119,178,85,.08)}
+.pill.hotel{color:#f0cd73;border-color:rgba(230,184,76,.35);background:rgba(230,184,76,.08)}
+.pill.must{color:#7fd0f0;border-color:rgba(111,180,216,.35);background:rgba(111,180,216,.08)}
+.day-copy{color:var(--muted);font-size:.88rem;line-height:1.55;margin-top:8px}
+.tag-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.tag{font-size:.72rem;color:var(--sand);background:rgba(215,194,141,.08);border:1px solid rgba(215,194,141,.18);border-radius:6px;padding:4px 7px}
+.day-side{border-left:1px solid var(--line);padding:14px 16px;background:rgba(255,255,255,.025)}
+.side-label{font-size:.68rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;font-weight:900;margin-bottom:5px}
+.side-line{font-size:.82rem;color:var(--muted);line-height:1.45;margin-bottom:9px}
+.side-line strong{color:var(--text)}
+.stay-grid,.food-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(292px,1fr));gap:12px}
+.stay-card,.food-card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:15px}
+.stay-card.featured,.food-card.featured{border-color:rgba(230,184,76,.65)}
+.card-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.card-top h3{font-size:.98rem;line-height:1.25;color:#fff}
+.type{font-size:.68rem;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);white-space:nowrap}
+.card-copy{font-size:.83rem;color:var(--muted);line-height:1.55;margin-top:10px}
+.card-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.micro{font-size:.68rem;color:var(--dim);border:1px solid var(--line);border-radius:999px;padding:3px 7px}
+.ev-layout{display:grid;grid-template-columns:1.05fr .95fr;gap:14px}
+.checklist{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:10px}
+.check{display:flex;gap:10px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px}
+.check input{margin-top:2px;width:18px;height:18px;accent-color:var(--gold);flex:0 0 auto}
+.check span{color:var(--muted);font-size:.86rem;line-height:1.45}
+.check strong{display:block;color:var(--text);font-size:.88rem;margin-bottom:2px}
+.source-list{display:grid;gap:8px}
+.source-item{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;color:var(--muted);font-size:.86rem;line-height:1.5}
+.source-toggle{position:fixed;right:18px;bottom:18px;z-index:90;height:42px;width:42px;border-radius:50%;border:1px solid var(--line);background:var(--gold);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.drawer{position:fixed;right:18px;bottom:70px;width:min(420px,calc(100vw - 36px));max-height:66vh;overflow:auto;background:#11130f;border:1px solid var(--line);border-radius:10px;padding:14px;z-index:90;box-shadow:0 18px 60px rgba(0,0,0,.35);display:none}
+.drawer.show{display:block}
+.drawer h3{font-size:.96rem;margin-bottom:8px;color:#fff}
+@media(max-width:1050px){
+  .hero{grid-template-columns:1fr}
+  .map-wrap{min-height:52vh;border-left:0;border-top:1px solid var(--line)}
+  .trip-controls,.route-summary,.ev-layout{grid-template-columns:1fr}
+  .stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .day-card{grid-template-columns:72px 1fr}
+  .day-side{grid-column:1/-1;border-left:0;border-top:1px solid var(--line)}
+}
+@media(max-width:680px){
+  .hero-copy,.content{padding-left:16px;padding-right:16px}
+  .tabs{padding:0 12px}
+  .hero-meta,.grid-2,.grid-3,.stat-grid{grid-template-columns:1fr}
+  .day-card{grid-template-columns:1fr}
+  .day-num{align-items:flex-start;border-right:0;border-bottom:1px solid var(--line)}
+  .map-toolbar{left:10px;right:10px;top:10px;display:block}
+  .map-note{display:none}
+  .route-switch{width:100%}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <section class="hero">
+    <div class="hero-copy">
+      <div>
+        <div class="kicker">Ventura to Oregon, Summer 2026</div>
+        <h1>Oregon Road Trip Planner</h1>
+        <p class="dek">A coast-first route for two people in a 2023 Model Y: car-camp where the view earns it, book hotels where dinner and recovery matter, and keep Crater Lake, the Oregon Coast, Bend, and the Gorge in the same plan.</p>
+        <div class="hero-actions">
+          <button class="icon-btn primary" onclick="showTab('itinerary')">
+            <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"></path></svg>
+            Build the trip
+          </button>
+          <button class="icon-btn" onclick="fitRoute()">
+            <svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"></path><circle cx="12" cy="12" r="4"></circle></svg>
+            Center map
+          </button>
+        </div>
+      </div>
+      <div class="hero-meta">
+        <div class="meta-tile"><div class="meta-val" id="heroMiles">1,980 mi</div><div class="meta-label">Primary loop</div></div>
+        <div class="meta-tile"><div class="meta-val" id="heroNights">14 nights</div><div class="meta-label">Adjustable</div></div>
+        <div class="meta-tile"><div class="meta-val">7 camp</div><div class="meta-label">Model Y nights</div></div>
+        <div class="meta-tile"><div class="meta-val">7 hotel</div><div class="meta-label">Food towns</div></div>
+      </div>
+    </div>
+    <div class="map-wrap">
+      <div id="map"></div>
+      <div class="map-popup" id="mapPopup"></div>
+      <div class="map-toolbar">
+        <div class="route-switch" aria-label="Route mode">
+          <button class="mode-btn active" data-route="balanced" onclick="setRoute('balanced')">Balanced</button>
+          <button class="mode-btn" data-route="coast" onclick="setRoute('coast')">Coast heavy</button>
+          <button class="mode-btn" data-route="cascade" onclick="setRoute('cascade')">Cascade loop</button>
+        </div>
+        <div class="map-note">Use this as a planning route, then verify live closures, smoke, charger status, and reservations before booking.</div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="tabs" aria-label="Planner tabs">
+    <button class="nav-btn active" data-tab="overview" onclick="showTab('overview')"><svg viewBox="0 0 24 24"><path d="M4 13h6V4H4zM14 20h6V4h-6zM4 20h6v-3H4z"></path></svg>Overview</button>
+    <button class="nav-btn" data-tab="itinerary" onclick="showTab('itinerary')"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path></svg>Itinerary</button>
+    <button class="nav-btn" data-tab="stays" onclick="showTab('stays')"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"></path><path d="M5 10v10h14V10"></path><path d="M9 20v-6h6v6"></path></svg>Stays</button>
+    <button class="nav-btn" data-tab="food" onclick="showTab('food')"><svg viewBox="0 0 24 24"><path d="M6 3v18M10 3v18M6 8h4M17 3v18M14 3c3 2 4 5 3 9"></path></svg>Food</button>
+    <button class="nav-btn" data-tab="ev" onclick="showTab('ev')"><svg viewBox="0 0 24 24"><path d="M7 2h8v20H7z"></path><path d="M15 6h2a2 2 0 0 1 2 2v3a2 2 0 0 0 2 2"></path><path d="M10 7h2M10 11h2"></path></svg>EV + Camp</button>
+    <button class="nav-btn" data-tab="book" onclick="showTab('book')"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>Book</button>
+  </nav>
+
+  <main class="content">
+    <section class="panel active" id="overview">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="num" id="statDays">15</div><div class="lab">Days</div></div>
+        <div class="stat-card"><div class="num" id="statDrive">44h</div><div class="lab">Drive time</div></div>
+        <div class="stat-card"><div class="num" id="statViews">31</div><div class="lab">View stops</div></div>
+        <div class="stat-card"><div class="num" id="statFood">18</div><div class="lab">Food targets</div></div>
+      </div>
+
+      <div class="trip-controls">
+        <div class="control">
+          <label for="nightRange">Trip length</label>
+          <div class="range-row">
+            <input id="nightRange" type="range" min="9" max="18" value="14" oninput="setNights(this.value)">
+            <div class="range-val"><span id="nightVal">14</span> nt</div>
+          </div>
+        </div>
+        <div class="control">
+          <label for="styleSelect">Lodging style</label>
+          <select id="styleSelect" onchange="renderItinerary()">
+            <option value="balanced">Balanced camp + hotel</option>
+            <option value="camp">More Model Y camping</option>
+            <option value="hotel">More hotels</option>
+          </select>
+        </div>
+        <div class="control">
+          <label for="paceSelect">Daily pace</label>
+          <select id="paceSelect" onchange="renderItinerary()">
+            <option value="slow">Scenic, shorter drives</option>
+            <option value="normal" selected>Balanced</option>
+            <option value="fast">Cover ground faster</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="route-summary">
+        <div class="card pad">
+          <div class="section-head">
+            <div>
+              <h2>Best Default Route</h2>
+              <p>Go north on the coast for the drama, turn inland for Bend and Crater Lake, then come home through Southern Oregon and the redwoods.</p>
+            </div>
+          </div>
+          <ul class="summary-list">
+            <li><span class="dot"></span><span><strong>Outbound:</strong> Ventura, Big Sur, Mendocino or Avenue of the Giants, Redwood National and State Parks, Brookings.</span></li>
+            <li><span class="dot"></span><span><strong>Oregon coast:</strong> Samuel H. Boardman, Bandon, Cape Perpetua, Yachats/Newport, Cannon Beach, Astoria.</span></li>
+            <li><span class="dot"></span><span><strong>Interior:</strong> Portland, Columbia River Gorge, Hood River, Bend, Crater Lake, Ashland.</span></li>
+            <li><span class="dot"></span><span><strong>Return:</strong> Redwoods or Mount Shasta, then pick a coastal or I-5 sprint depending on time.</span></li>
+          </ul>
+        </div>
+        <div class="card pad">
+          <div class="section-head">
+            <div>
+              <h2>Planning Rules</h2>
+              <p>Use hotels when they unlock dinner, laundry, showers, or a short walk to town. Use camp when you can wake up at a beach, redwood grove, lake, or dark-sky site.</p>
+            </div>
+          </div>
+          <ul class="summary-list">
+            <li><span class="dot"></span><span>Book Oregon State Park campgrounds at the six-month window, especially Harris Beach, Cape Blanco, South Beach, and Fort Stevens.</span></li>
+            <li><span class="dot"></span><span>Keep Crater Lake flexible until July if Rim Drive matters; snow can delay full access.</span></li>
+            <li><span class="dot"></span><span>Arrive at camp with enough battery to run Camp Mode overnight and still reach the next charger.</span></li>
+            <li><span class="dot"></span><span>Before departure, check TripCheck, Caltrans QuickMap, wildfire smoke, and charger availability.</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="itinerary">
+      <div class="section-head">
+        <div>
+          <h2>Day-by-Day Plan</h2>
+          <p>This starts as a 15-day, 14-night route. Change trip length or lodging style in Overview and the overnight mix updates.</p>
+        </div>
+        <button class="small-btn" onclick="window.print()" style="height:36px;padding:0 12px">Print</button>
+      </div>
+      <div class="itinerary" id="itineraryList"></div>
+    </section>
+
+    <section class="panel" id="stays">
+      <div class="section-head">
+        <div>
+          <h2>Stay Targets</h2>
+          <p>Priority spots for car camping and hotel nights, chosen for views, logistics, and access to good food.</p>
+        </div>
+      </div>
+      <div class="stay-grid" id="stayGrid"></div>
+    </section>
+
+    <section class="panel" id="food">
+      <div class="section-head">
+        <div>
+          <h2>Restaurant Pairings</h2>
+          <p>Use these around hotel nights or early dinners before returning to camp. Recheck hours and reservations before locking the route.</p>
+        </div>
+      </div>
+      <div class="food-grid" id="foodGrid"></div>
+    </section>
+
+    <section class="panel" id="ev">
+      <div class="section-head">
+        <div>
+          <h2>Model Y Camping + Charging</h2>
+          <p>Practical constraints for sleeping in the car without turning the trip into a charger hunt.</p>
+        </div>
+      </div>
+      <div class="ev-layout">
+        <div class="card pad">
+          <h3>Camp Mode protocol</h3>
+          <ul class="summary-list" style="margin-top:10px">
+            <li><span class="dot"></span><span>Camp Mode maintains cabin temperature and powers USB/low-voltage outlets while parked. Set climate before sleep and keep the phone paired.</span></li>
+            <li><span class="dot"></span><span>Because Sentry Mode, vehicle alarm, and Walk-Away Door Lock are inactive in Camp Mode, manually lock the car from the screen or app before sleeping.</span></li>
+            <li><span class="dot"></span><span>Plan overnight energy conservatively. In mild coastal weather, budget roughly 8 to 15 percent. In cold mountain weather, budget more.</span></li>
+            <li><span class="dot"></span><span>Pack window shades, bug screens, a fitted mattress, small fan, condensation towel, headlamps, and two small duffels instead of hard bins in the sleep area.</span></li>
+          </ul>
+        </div>
+        <div class="card pad">
+          <h3>Charging rhythm</h3>
+          <ul class="summary-list" style="margin-top:10px">
+            <li><span class="dot"></span><span><strong>Morning:</strong> leave camp with enough buffer to reach breakfast plus a fast charger.</span></li>
+            <li><span class="dot"></span><span><strong>Midday:</strong> charge during lunch in larger towns: Eureka/Arcata, Brookings, Coos Bay, Newport, Seaside/Astoria, Portland, Hood River, Bend, Medford.</span></li>
+            <li><span class="dot"></span><span><strong>Crater Lake:</strong> Mazama Village has an EV station listed by NPS, but do not make it the only plan. Charge in Klamath Falls, Medford, or Bend first.</span></li>
+            <li><span class="dot"></span><span><strong>Remote coast:</strong> Samuel Boardman, Cape Blanco, and Cape Perpetua are view-first zones. Treat them as charged-arrival areas.</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="book">
+      <div class="section-head">
+        <div>
+          <h2>Booking Checklist</h2>
+          <p>Stored in this browser. Use it as the working list while you turn the draft route into reservations.</p>
+        </div>
+        <button class="small-btn" onclick="clearChecks()" style="height:36px;padding:0 12px">Reset checks</button>
+      </div>
+      <div class="checklist" id="checklist"></div>
+    </section>
+  </main>
+</div>
+
+<button class="source-toggle" onclick="toggleSources()" title="Sources">
+  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+</button>
+<aside class="drawer" id="sourceDrawer">
+  <h3>Planning Sources</h3>
+  <div class="source-list" id="sourceList"></div>
+</aside>
+
+<script>
+const routes = {
+  balanced: {
+    label: "Balanced",
+    miles: "1,980 mi",
+    drive: "44h",
+    coords: [
+      [34.2746,-119.2290],[36.2704,-121.8081],[37.7749,-122.4194],[39.4457,-123.8053],
+      [40.8021,-124.1637],[41.8665,-124.2026],[42.0526,-124.2839],[43.1190,-124.4084],
+      [44.3112,-124.1048],[45.8918,-123.9615],[45.5152,-122.6784],[45.7089,-121.5123],
+      [44.0582,-121.3153],[42.9446,-122.1090],[42.1946,-122.7095],[34.2746,-119.2290]
+    ]
+  },
+  coast: {
+    label: "Coast heavy",
+    miles: "2,120 mi",
+    drive: "49h",
+    coords: [
+      [34.2746,-119.2290],[35.2828,-120.6596],[36.2704,-121.8081],[37.7749,-122.4194],
+      [38.8055,-123.0172],[39.4457,-123.8053],[40.8021,-124.1637],[41.8665,-124.2026],
+      [42.0526,-124.2839],[42.7390,-124.4973],[43.1190,-124.4084],[44.0521,-123.0868],
+      [44.6368,-124.0535],[45.8918,-123.9615],[46.1879,-123.8313],[45.5152,-122.6784],
+      [44.0582,-121.3153],[34.2746,-119.2290]
+    ]
+  },
+  cascade: {
+    label: "Cascade loop",
+    miles: "1,880 mi",
+    drive: "41h",
+    coords: [
+      [34.2746,-119.2290],[37.7749,-122.4194],[40.5865,-122.3917],[42.1946,-122.7095],
+      [42.9446,-122.1090],[44.0582,-121.3153],[45.7089,-121.5123],[45.5152,-122.6784],
+      [45.8918,-123.9615],[44.6368,-124.0535],[43.1190,-124.4084],[41.8665,-124.2026],
+      [40.8021,-124.1637],[34.2746,-119.2290]
+    ]
+  }
+};
+
+const stops = [
+  {name:"Ventura", type:"Start", lat:34.2746, lng:-119.2290, note:"Load the Model Y, pre-download maps, leave early enough to clear LA traffic."},
+  {name:"Big Sur", type:"View", lat:36.2704, lng:-121.8081, note:"Optional first scenic night if Highway 1 access and reservations cooperate."},
+  {name:"Avenue of the Giants", type:"Camp", lat:40.3524, lng:-123.9239, note:"Redwood reset before crossing into Oregon."},
+  {name:"Brookings / Harris Beach", type:"Camp", lat:42.0526, lng:-124.2839, note:"Best south-coast base for Samuel H. Boardman."},
+  {name:"Bandon", type:"Hotel", lat:43.1190, lng:-124.4084, note:"Sea stacks, Face Rock, good dinner recovery night."},
+  {name:"Yachats / Cape Perpetua", type:"Camp", lat:44.3112, lng:-124.1048, note:"Tidepools, Thor's Well, forest-to-ocean hikes."},
+  {name:"Cannon Beach", type:"Hotel", lat:45.8918, lng:-123.9615, note:"Haystack Rock, Ecola viewpoints, walkable dinner."},
+  {name:"Portland", type:"Hotel", lat:45.5152, lng:-122.6784, note:"Laundry, restaurants, hotel reset."},
+  {name:"Hood River", type:"Hotel", lat:45.7089, lng:-121.5123, note:"Gorge waterfalls, orchards, river views."},
+  {name:"Bend", type:"Hotel", lat:44.0582, lng:-121.3153, note:"High desert, breweries, Smith Rock or lakes side trips."},
+  {name:"Crater Lake", type:"Must", lat:42.9446, lng:-122.1090, note:"Rim Drive if open, sunrise or late-day overlooks."},
+  {name:"Ashland", type:"Hotel", lat:42.1946, lng:-122.7095, note:"Good final Oregon dinner before the southbound push."}
+];
+
+const baseDays = [
+  {from:"Ventura", to:"Big Sur or Monterey", miles:285, drive:"5.5h", stay:"camp", must:["Bixby Bridge pullout","Pfeiffer coast views","Sunset above Highway 1"], hotel:"Monterey/Carmel hotel backup", camp:"Pfeiffer Big Sur, Veterans Memorial Park, or coastal private camp", food:"Carmel/Monterey dinner if hoteling", note:"Use this as a scenic first night only if Highway 1 and camp availability are clean. Otherwise sprint to the Bay Area."},
+  {from:"Big Sur", to:"Mendocino or Avenue of the Giants", miles:270, drive:"6h", stay:"camp", must:["Golden Gate quick stop","Mendocino headlands","Redwood arrival walk"], hotel:"Mendocino inn backup", camp:"Humboldt Redwoods area", food:"Casual seafood or picnic dinner", note:"This is a long but beautiful transition. The redwoods are the better camp payoff than another city night."},
+  {from:"Redwoods", to:"Brookings / Harris Beach", miles:145, drive:"3h", stay:"camp", must:["Prairie Creek redwoods","Jedediah Smith side roads","Harris Beach sunset"], hotel:"Brookings hotel backup", camp:"Harris Beach State Park", food:"Brookings seafood, or simple camp meal", note:"Arrive early enough to set up the Model Y and walk the beach before dark."},
+  {from:"Brookings", to:"Bandon", miles:85, drive:"2.5h", stay:"hotel", must:["Natural Bridges","Secret Beach","Face Rock sunset"], hotel:"Bandon hotel or inn", camp:"Cape Blanco backup if you want a camp night", food:"Redfish in Port Orford or Bandon dinner", note:"Keep this day short. Samuel H. Boardman is one of the highest-value view sections of the whole trip."},
+  {from:"Bandon", to:"Yachats / Cape Perpetua", miles:145, drive:"3.5h", stay:"camp", must:["Shore Acres","Oregon Dunes overlook","Cape Perpetua sunset"], hotel:"Overleaf-style Yachats backup", camp:"Tillicum, Cape Perpetua area, South Beach backup", food:"Florence or Yachats dinner", note:"Time Cape Perpetua for late afternoon and check tide timing for the rocky shoreline."},
+  {from:"Yachats", to:"Cannon Beach", miles:170, drive:"4h", stay:"hotel", must:["Yaquina Head","Three Capes detour","Haystack Rock"], hotel:"Cannon Beach or Manzanita", camp:"Nehalem Bay or Cape Lookout backup", food:"Cannon Beach dinner", note:"This is a good shower and restaurant night after multiple coastal camp stops."},
+  {from:"Cannon Beach", to:"Astoria / Portland", miles:100, drive:"2.5h", stay:"hotel", must:["Ecola State Park","Astoria Column","Columbia River views"], hotel:"Portland hotel", camp:"Fort Stevens if extending coast time", food:"Astoria lunch, Portland dinner", note:"Choose Astoria overnight if you want one more coastal town; choose Portland if you want a stronger restaurant night."},
+  {from:"Portland", to:"Hood River", miles:65, drive:"1.5h", stay:"hotel", must:["Multnomah Falls access plan","Rowena Crest","Fruit Loop"], hotel:"Hood River", camp:"Ainsworth or Viento if available", food:"Gorge breweries or farm dinner", note:"Use I-84 and official waterfall access info. Historic Highway closures can affect the classic route."},
+  {from:"Hood River", to:"Bend", miles:145, drive:"3h", stay:"hotel", must:["Mount Hood view points","Smith Rock sunset","Deschutes River walk"], hotel:"Bend", camp:"Tumalo State Park backup", food:"Zydeco or Bend food carts", note:"Bend is worth a real room: laundry, food, and a reset before Crater Lake."},
+  {from:"Bend", to:"Crater Lake", miles:115, drive:"2.5h", stay:"camp", must:["Rim Village","Watchman overlook","Rim Drive if open"], hotel:"Crater Lake Lodge or Mazama cabins if available", camp:"Mazama Campground or nearby national forest options", food:"Pack dinner or eat before park arrival", note:"Do not count on camping with a lake view in summer. Verify road status before committing."},
+  {from:"Crater Lake", to:"Ashland", miles:95, drive:"2.5h", stay:"hotel", must:["Morning rim stop","Rogue River corridor","Ashland downtown"], hotel:"Ashland", camp:"Hyatt Lake or Emigrant Lake backup", food:"Ashland dinner", note:"A hotel here makes the southbound push easier and gives you a final Oregon restaurant night."},
+  {from:"Ashland", to:"Mount Shasta / Redding", miles:145, drive:"2.5h", stay:"camp", must:["Siskiyou views","Mount Shasta sunset","Lake Siskiyou walk"], hotel:"Mount Shasta hotel backup", camp:"Lake Siskiyou or nearby camp", food:"Mount Shasta casual dinner", note:"Use this as a decompression night if you have time; skip it if you need to get home faster."},
+  {from:"Mount Shasta", to:"Bay Area or Central Coast", miles:275, drive:"5h", stay:"hotel", must:["Sacramento River canyon","Bay Area dinner","Sleep before final drive"], hotel:"Bay Area, Santa Cruz, or Paso Robles", camp:"Only if temperatures are mild", food:"Pick the town based on traffic timing", note:"This is the practical repositioning day."},
+  {from:"Central Coast", to:"Ventura", miles:220, drive:"4h", stay:"home", must:["Slow breakfast","Coastal detour if energy is high","Home unload"], hotel:"Home", camp:"None", food:"Santa Barbara lunch", note:"Keep the last day easy enough that the trip ends cleanly instead of exhausted."}
+];
+
+const stayTargets = [
+  {name:"Harris Beach State Park", type:"Camp", feature:true, place:"Brookings", text:"Best south Oregon coast base: beach access, showers, and quick access to Samuel H. Boardman.", meta:["Reserve 6 months out","Great Model Y night","Hot showers"]},
+  {name:"Cape Blanco / Port Orford", type:"Camp", feature:false, place:"South Coast", text:"Windy, exposed, dramatic. Good if you want a wilder night and Redfish dinner nearby.", meta:["Sunset coast","Backup to Bandon hotel","Wind check"]},
+  {name:"Bandon Inn or beach hotel", type:"Hotel", feature:true, place:"Bandon", text:"Worth paying for if you want Face Rock sunset, a shower, and an easy dinner after Boardman.", meta:["Food town","Laundry buffer","Sea stacks"]},
+  {name:"Cape Perpetua / Tillicum area", type:"Camp", feature:true, place:"Yachats", text:"One of the best camp zones on the central coast, with forest, tidepools, and ocean viewpoints.", meta:["Tide timing","Book early","View payoff"]},
+  {name:"Cannon Beach or Manzanita hotel", type:"Hotel", feature:true, place:"North Coast", text:"Use a hotel here to walk to dinner and avoid moving camp gear after a long coastal day.", meta:["Haystack Rock","Ecola nearby","Walkable"]},
+  {name:"Portland hotel", type:"Hotel", feature:false, place:"Portland", text:"Not the scenic night. It is the reset night: laundry, charging, gear cleanup, and serious food.", meta:["Restaurant night","Laundry","Urban charger"]},
+  {name:"Hood River hotel", type:"Hotel", feature:true, place:"Gorge", text:"A strong lodging splurge if you want Gorge views, orchards, beer, and a clean launch to Bend.", meta:["Gorge base","Waterfalls","Food + beer"]},
+  {name:"Bend hotel", type:"Hotel", feature:true, place:"Bend", text:"Book a room before Crater Lake. Bend gives you food, charging, supplies, and a real bed.", meta:["High desert","Before Crater Lake","Strong food"]},
+  {name:"Mazama Campground / nearby backup", type:"Camp", feature:true, place:"Crater Lake", text:"Use official park lodging if available, but carry backup options outside the park boundary.", meta:["Check road status","No lake-view camping","Cold nights"]},
+  {name:"Ashland hotel", type:"Hotel", feature:false, place:"Southern Oregon", text:"A practical final Oregon room with good dinner options before the long drive south.", meta:["Final reset","Walkable town","Return launch"]}
+];
+
+const foodTargets = [
+  {name:"Redfish", type:"Dinner", feature:true, place:"Port Orford", text:"View-forward seafood stop that pairs perfectly with Samuel Boardman or Cape Blanco.", meta:["South coast","Sunset","Reserve/check hours"]},
+  {name:"Face Rock Creamery", type:"Snack", feature:false, place:"Bandon", text:"Easy road-trip stop for cheese, snacks, and picnic supplies.", meta:["Classic coast","Quick stop","Picnic"]},
+  {name:"Local Ocean Seafoods", type:"Lunch/Dinner", feature:true, place:"Newport", text:"High-value central coast seafood stop near Yaquina Bay.", meta:["Seafood","Central coast","Popular"]},
+  {name:"Sorella", type:"Dinner", feature:false, place:"Newport", text:"Good Italian comfort-food option if Newport becomes the hotel night.", meta:["Hotel pairing","Nye Beach","Reservations"]},
+  {name:"The Bistro", type:"Dinner", feature:true, place:"Cannon Beach", text:"A strong walkable dinner target for a Cannon Beach hotel night.", meta:["North coast","Hotel night","Walkable"]},
+  {name:"Wanda's Cafe", type:"Breakfast", feature:false, place:"Nehalem", text:"Breakfast or pastry stop between Cannon Beach, Manzanita, and Tillamook.", meta:["Breakfast","Expect waits","Morning stop"]},
+  {name:"Fedé Trattoria", type:"Dinner", feature:false, place:"Astoria", text:"Worth considering if Astoria becomes the overnight instead of Portland.", meta:["Astoria","Waterfront","No-reservation style"]},
+  {name:"Portland pick", type:"Dinner", feature:true, place:"Portland", text:"Keep this flexible and book closer to the trip. Use Portland for the best planned dinner of the route.", meta:["Splurge night","Book ahead","Laundry night"]},
+  {name:"Hood River breweries", type:"Dinner", feature:false, place:"Hood River", text:"Good match for Gorge day: casual dinner, river view, and easy hotel return.", meta:["Gorge","Beer","Casual"]},
+  {name:"Zydeco Kitchen & Cocktails", type:"Dinner", feature:true, place:"Bend", text:"Reliable Bend restaurant target before the Crater Lake segment.", meta:["Bend","Reserve","Hotel pairing"]},
+  {name:"Ashland dinner", type:"Dinner", feature:false, place:"Ashland", text:"Choose after checking theater/event timing and whether you want casual or nicer.", meta:["Final Oregon night","Walkable","Flexible"]}
+];
+
+const checks = [
+  ["Pick exact travel dates","Decide whether this is a 10, 14, or 18 night trip before booking camps."],
+  ["Check Oregon State Parks six-month window","Target Harris Beach, Cape Blanco, South Beach/Tillicum backups, Nehalem Bay, Fort Stevens."],
+  ["Verify Crater Lake access","Check Rim Drive, North Entrance Road, smoke, and lodging/camping status."],
+  ["Book hotel anchor nights","Bandon or Cannon Beach, Portland, Hood River, Bend, Ashland."],
+  ["Create Tesla route in-car","Save chargers around Eureka/Arcata, Brookings, Coos Bay, Newport, Portland, Hood River, Bend, Medford/Klamath Falls."],
+  ["Pack Model Y sleep kit","Mattress, window shades, bug screens, pillows, sheet, power banks, headlamps, condensation towel."],
+  ["Download offline maps","Google/Apple maps, Organic Maps, park PDFs, campsite confirmations."],
+  ["Check road conditions","TripCheck for Oregon, Caltrans QuickMap for California, plus wildfire/smoke map."],
+  ["Make restaurant reservations","Prioritize Redfish, Cannon Beach dinner, Portland, Bend, and Ashland."],
+  ["Build bad-weather alternates","Replace exposed coast camping with hotels in Brookings, Bandon, Newport, or Cannon Beach."],
+  ["Tide and sunrise notes","Set alerts for Cape Perpetua, Bandon, Cannon Beach, and Crater Lake sunrise."],
+  ["Final day-before check","Roads, smoke, charger outages, campsite rules, food hours, and arrival cutoffs."]
+];
+
+const sources = [
+  ["Oregon Scenic Byways", "ODOT notes Oregon has 29 designated Scenic Byways and Tour Routes, including the Pacific coastline, Crater Lake, and Columbia River Gorge.", "https://www.oregon.gov/odot/programs/pages/scenic-byways.aspx"],
+  ["Oregon State Parks reservations", "State Parks accepts most reservations same day through six months ahead, with new sites coming online at 6 a.m. and same-day reservation fee waived.", "https://stateparks.oregon.gov/index.cfm?do=reserve.dsp_reserve"],
+  ["Harris Beach State Park", "Official park page lists year-round camping and notes Samuel H. Boardman starts about three miles north of Harris Beach.", "https://stateparks.oregon.gov/index.cfm?do=parkPage.dsp_parkPubs&parkId=58"],
+  ["Crater Lake Rim Drive", "NPS describes Rim Drive as a 33-mile route with about 30 overlooks, typically fully open July through October depending on conditions.", "https://www.nps.gov/crla/planyourvisit/scenic-rim-drive.htm"],
+  ["Crater Lake camping and EV", "NPS notes no summer camping with a lake view, in-park lodging/camping reservation guidance, and an EV station at Mazama Village.", "https://www.nps.gov/crla/planyourvisit/lodging-camping.htm"],
+  ["TripCheck", "Official Oregon traveler information for current road conditions and closures.", "https://www.tripcheck.com/DynamicReports/Report/RoadConditions"],
+  ["Tesla Model Y Camp Mode", "Tesla owner manual says Camp maintains cabin temperature and power, while Sentry Mode, alarm, and Walk-Away Door Lock are inactive.", "https://www.tesla.com/ownersmanual/2020_2024_modely/en_kr/GUID-4F3599A1-20D9-4A49-B4A0-5261F957C096.html"],
+  ["Oregon Coast dining", "Eater Portland's 2025 Oregon Coast guide informed the restaurant shortlist.", "https://pdx.eater.com/maps/best-restaurants-oregon-coast-newport-cannon-beach-astoria"],
+  ["Bend dining", "Eater Portland's Bend guide informed the Bend restaurant target.", "https://pdx.eater.com/maps/best-restaurants-bend-oregon-guide"]
+];
+
+let currentRoute = "balanced";
+const mapBounds = {minLat:33.7, maxLat:46.6, minLng:-125.25, maxLng:-118.45};
+const coastShape = [
+  [46.4,-124.05],[45.9,-123.98],[45.45,-123.95],[44.95,-124.03],[44.5,-124.08],
+  [44.05,-124.1],[43.6,-124.18],[43.1,-124.42],[42.55,-124.42],[42.05,-124.3],
+  [41.55,-124.16],[41.0,-124.12],[40.5,-124.28],[39.8,-123.95],[39.2,-123.75],
+  [38.7,-123.45],[38.0,-122.95],[37.35,-122.4],[36.75,-121.95],[36.2,-121.78],
+  [35.55,-121.2],[34.95,-120.65],[34.25,-119.25]
+];
+const i5Shape = [
+  [45.55,-122.67],[44.95,-123.02],[44.05,-123.1],[43.2,-123.35],[42.35,-122.9],
+  [41.2,-122.28],[40.55,-122.39],[39.2,-121.75],[38.6,-121.5],[37.77,-122.42],
+  [36.7,-121.65],[35.3,-120.66],[34.27,-119.23]
+];
+const gorgeShape = [[45.55,-122.67],[45.58,-122.2],[45.64,-121.95],[45.7,-121.51]];
+
+function setRoute(key){
+  currentRoute = key;
+  document.querySelectorAll(".mode-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.route === key));
+  const r = routes[key];
+  renderMap();
+  document.getElementById("heroMiles").textContent = r.miles;
+  document.getElementById("statDrive").textContent = r.drive;
+}
+
+function fitRoute(){
+  renderMap();
+}
+
+function initMap(){
+  renderMap();
+}
+
+function project(lat, lng){
+  const x = ((lng - mapBounds.minLng) / (mapBounds.maxLng - mapBounds.minLng)) * 1000;
+  const y = ((mapBounds.maxLat - lat) / (mapBounds.maxLat - mapBounds.minLat)) * 760;
+  return [Math.round(x * 10) / 10, Math.round(y * 10) / 10];
+}
+
+function pointsFor(coords){
+  return coords.map(([lat,lng]) => project(lat,lng).join(",")).join(" ");
+}
+
+function pathFor(coords){
+  return coords.map(([lat,lng], idx) => {
+    const [x,y] = project(lat,lng);
+    return `${idx ? "L" : "M"}${x} ${y}`;
+  }).join(" ");
+}
+
+function stopColor(type){
+  if(type === "Hotel") return "#e6b84c";
+  if(type === "Camp") return "#77b255";
+  if(type === "Must") return "#6fb4d8";
+  return "#d7c28d";
+}
+
+function renderMap(){
+  const r = routes[currentRoute];
+  const landPath = `${pathFor(coastShape)} L1000 734 L1000 0 L${project(46.4,-124.05).join(" ")} Z`;
+  const stopMarkup = stops.map((stop, idx) => {
+    const [x,y] = project(stop.lat, stop.lng);
+    const labelY = idx % 2 === 0 ? y - 18 : y + 24;
+    const anchor = x > 760 ? "end" : "start";
+    const labelX = x > 760 ? x - 14 : x + 14;
+    return `<g class="map-stop-group" data-stop="${idx}" tabindex="0" role="button" aria-label="${stop.name}">
+      <circle class="map-stop-ring" cx="${x}" cy="${y}" r="14"></circle>
+      <circle class="map-stop" cx="${x}" cy="${y}" r="10" fill="${stopColor(stop.type)}"></circle>
+      <text class="map-stop-num" x="${x}" y="${y + .5}">${idx + 1}</text>
+      <text class="map-small-label" x="${labelX}" y="${labelY}" text-anchor="${anchor}">${stop.name.split(" / ")[0]}</text>
+    </g>`;
+  }).join("");
+  document.getElementById("map").innerHTML = `<svg class="svg-map" viewBox="0 0 1000 760" preserveAspectRatio="xMidYMid meet" aria-label="Static route map from Ventura to Oregon">
+    <rect class="map-water" x="0" y="0" width="1000" height="760"></rect>
+    <path class="map-land" d="${landPath}"></path>
+    <path class="map-shade" d="M610 0 C560 110 600 190 535 280 C465 378 520 480 450 612 C416 678 455 726 430 760 L1000 760 L1000 0 Z"></path>
+    <path class="map-road" d="${pathFor(coastShape)}"></path>
+    <path class="map-road" d="${pathFor(i5Shape)}"></path>
+    <path class="map-road" d="${pathFor(gorgeShape)}"></path>
+    <polyline class="map-route" points="${pointsFor(r.coords)}"></polyline>
+    <text class="map-region" x="610" y="132">OREGON</text>
+    <text class="map-region" x="545" y="592">CALIFORNIA</text>
+    <text class="map-label" x="${project(45.5152,-122.6784)[0] + 18}" y="${project(45.5152,-122.6784)[1] - 28}">Portland</text>
+    <text class="map-label" x="${project(44.0582,-121.3153)[0] + 18}" y="${project(44.0582,-121.3153)[1] - 22}">Bend</text>
+    <text class="map-label" x="${project(34.2746,-119.2290)[0] - 16}" y="${project(34.2746,-119.2290)[1] - 24}" text-anchor="end">Ventura</text>
+    ${stopMarkup}
+  </svg>`;
+  bindMapStops();
+}
+
+function bindMapStops(){
+  const popup = document.getElementById("mapPopup");
+  document.querySelectorAll(".map-stop-group").forEach(group => {
+    const show = event => {
+      const stop = stops[Number(group.dataset.stop)];
+      const box = document.querySelector(".map-wrap").getBoundingClientRect();
+      popup.innerHTML = `<strong>${stop.name}</strong><span>${stop.type}</span><p>${stop.note}</p>`;
+      popup.style.left = `${Math.min(Math.max(event.clientX - box.left + 14, 10), box.width - 290)}px`;
+      popup.style.top = `${Math.min(Math.max(event.clientY - box.top + 14, 10), box.height - 150)}px`;
+      popup.classList.add("show");
+    };
+    group.addEventListener("mouseenter", show);
+    group.addEventListener("mousemove", show);
+    group.addEventListener("click", show);
+    group.addEventListener("focus", () => {
+      const stop = stops[Number(group.dataset.stop)];
+      popup.innerHTML = `<strong>${stop.name}</strong><span>${stop.type}</span><p>${stop.note}</p>`;
+      popup.style.left = "18px";
+      popup.style.top = "74px";
+      popup.classList.add("show");
+    });
+    group.addEventListener("mouseleave", () => popup.classList.remove("show"));
+    group.addEventListener("blur", () => popup.classList.remove("show"));
+  });
+}
+
+function showTab(id){
+  document.querySelectorAll(".panel").forEach(p => p.classList.toggle("active", p.id === id));
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === id));
+}
+
+function setNights(value){
+  document.getElementById("nightVal").textContent = value;
+  document.getElementById("heroNights").textContent = `${value} nights`;
+  document.getElementById("statDays").textContent = Number(value) + 1;
+  renderItinerary();
+}
+
+function adjustedDays(){
+  const nights = Number(document.getElementById("nightRange").value);
+  let days = baseDays.slice();
+  if(nights <= 10){
+    days = days.filter((_, idx) => ![0,6,11,12].includes(idx));
+  } else if(nights <= 12){
+    days = days.filter((_, idx) => ![11,12].includes(idx));
+  } else if(nights >= 16){
+    days = [
+      ...baseDays.slice(0,5),
+      {from:"Yachats", to:"Newport / Depoe Bay", miles:40, drive:"1h", stay:"hotel", must:["Yaquina Head","Local Ocean dinner","Slow laundry morning"], hotel:"Newport hotel", camp:"South Beach backup", food:"Local Ocean or Sorella", note:"Added cushion night for the central coast."},
+      ...baseDays.slice(5,10),
+      {from:"Crater Lake", to:"Klamath Falls or Umpqua", miles:90, drive:"2h", stay:"camp", must:["Second rim morning","Waterfall side trip","Dark-sky camp"], hotel:"Klamath Falls backup", camp:"Diamond Lake or nearby national forest", food:"Pack camp dinner", note:"Added cushion around Crater Lake so weather does not ruin the visit."},
+      ...baseDays.slice(10)
+    ];
+  }
+  return days;
+}
+
+function lodgingFor(day, idx){
+  const style = document.getElementById("styleSelect").value;
+  if(day.stay === "home") return "home";
+  if(style === "hotel" && ["camp"].includes(day.stay) && idx % 2 === 1) return "hotel";
+  if(style === "camp" && ["hotel"].includes(day.stay) && !["Bend","Portland","Ashland"].some(x => day.to.includes(x))) return "camp";
+  return day.stay;
+}
+
+function renderItinerary(){
+  const list = document.getElementById("itineraryList");
+  const days = adjustedDays();
+  list.innerHTML = days.map((day, idx) => {
+    const stay = lodgingFor(day, idx);
+    const stayClass = stay === "hotel" ? "hotel" : stay === "camp" ? "camp" : "must";
+    const stayText = stay === "hotel" ? day.hotel : stay === "camp" ? day.camp : "Home";
+    return `<article class="day-card">
+      <div class="day-num"><strong>${idx+1}</strong><span>Day</span></div>
+      <div class="day-main">
+        <div class="day-title">
+          <h3>${day.from} to ${day.to}</h3>
+          <span class="pill ${stayClass}">${stay}</span>
+          <span class="pill">${day.miles} mi</span>
+          <span class="pill">${day.drive}</span>
+        </div>
+        <p class="day-copy">${day.note}</p>
+        <div class="tag-row">${day.must.map(m => `<span class="tag">${m}</span>`).join("")}</div>
+      </div>
+      <aside class="day-side">
+        <div class="side-label">Stay</div>
+        <div class="side-line"><strong>${stayText}</strong></div>
+        <div class="side-label">Food pairing</div>
+        <div class="side-line">${day.food}</div>
+      </aside>
+    </article>`;
+  }).join("");
+  const campCount = days.filter((d,i) => lodgingFor(d,i) === "camp").length;
+  const hotelCount = days.filter((d,i) => lodgingFor(d,i) === "hotel").length;
+  document.querySelectorAll(".hero-meta .meta-val")[2].textContent = `${campCount} camp`;
+  document.querySelectorAll(".hero-meta .meta-val")[3].textContent = `${hotelCount} hotel`;
+}
+
+function renderCards(){
+  document.getElementById("stayGrid").innerHTML = stayTargets.map(s => `<article class="stay-card ${s.feature ? "featured" : ""}">
+    <div class="card-top"><h3>${s.name}</h3><div class="type">${s.type}</div></div>
+    <p class="card-copy">${s.text}</p>
+    <div class="card-meta"><span class="micro">${s.place}</span>${s.meta.map(m => `<span class="micro">${m}</span>`).join("")}</div>
+  </article>`).join("");
+  document.getElementById("foodGrid").innerHTML = foodTargets.map(f => `<article class="food-card ${f.feature ? "featured" : ""}">
+    <div class="card-top"><h3>${f.name}</h3><div class="type">${f.type}</div></div>
+    <p class="card-copy">${f.text}</p>
+    <div class="card-meta"><span class="micro">${f.place}</span>${f.meta.map(m => `<span class="micro">${m}</span>`).join("")}</div>
+  </article>`).join("");
+}
+
+function renderChecklist(){
+  const saved = JSON.parse(localStorage.getItem("oregonTripChecks") || "{}");
+  document.getElementById("checklist").innerHTML = checks.map((item, idx) => `<label class="check">
+    <input type="checkbox" ${saved[idx] ? "checked" : ""} onchange="saveCheck(${idx}, this.checked)">
+    <span><strong>${item[0]}</strong>${item[1]}</span>
+  </label>`).join("");
+}
+
+function saveCheck(idx, checked){
+  const saved = JSON.parse(localStorage.getItem("oregonTripChecks") || "{}");
+  saved[idx] = checked;
+  localStorage.setItem("oregonTripChecks", JSON.stringify(saved));
+}
+
+function clearChecks(){
+  localStorage.removeItem("oregonTripChecks");
+  renderChecklist();
+}
+
+function renderSources(){
+  document.getElementById("sourceList").innerHTML = sources.map(s => `<div class="source-item"><strong>${s[0]}</strong><br>${s[1]}<br><a href="${s[2]}" target="_blank" rel="noreferrer">Open source</a></div>`).join("");
+}
+
+function toggleSources(){
+  document.getElementById("sourceDrawer").classList.toggle("show");
+}
+
+window.addEventListener("load", () => {
+  initMap();
+  renderItinerary();
+  renderCards();
+  renderChecklist();
+  renderSources();
+});
+</script>
+</body>
+</html>
